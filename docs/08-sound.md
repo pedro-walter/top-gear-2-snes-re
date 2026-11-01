@@ -29,3 +29,15 @@ The decompressed driver (`out/spc_driver.bin`, 3244 B) is IPL-format blocks `[le
 * `0ED8` (start effect/sequence): allocate a voice (`0F1D`), reset the voice's tracks (`$0280/$0288/$0290+X`), then `0F53`: **ids `>= $40` are rejected**; the id indexes the 4-byte records at `$0400+id*4` / `$0501+id*4` (sequence pointers and flags, loaded with the song set, so the table content depends on the song/sound set in bank 1B).
 * So the CPU-side ids in `$05A1/$05A7` (docs above) are SFX ids 0..63 whose meaning comes from the song set's data, not from the driver.
 Open: the sequence byte-code at `10AA` and the id -> sound naming (needs dumping the `$0400/$0500` tables after the set upload; Mesen can read APU RAM via `emu.memType.snesSpcRam`? untested).
+
+## SFX trigger sites in the race code (static scan of `STA $05A1/$05A7`, DP-independent)
+The CPU writes a **16-bit word** to `$05A1` (low byte = SFX id, high byte `$FF` = "loop/keep" modifier? or `$80` = the second variant) and a word to `$05A3` (parameter: `4`/`$10` for player 1, `8`/`$20` for player 2: the code at `00:A2xx..B3xx` is a copy of `00:8Bxx..9Axx` for P2), then the mailbox forwards them. Id `$0001` written to `$05A1` is the "stop this effect" command.
+| site (P1 / P2 copy) | word | param | context |
+|---|---|---|---|
+| `00:8DD2` / `00:A636` | `$FF20` / `$FF21` | 4 / 8 | a button edge in `$0030` bit `$2000` sets `$34` bit `$0800`; the matching release at `8DFC`/`A660` writes `$0001` |
+| `00:8E24` / `00:A688` | `$FF14` | `$10` / `$20` | start of a looping effect (state `$01A6`, `$8000`) |
+| `00:8E54` / `00:A6B8` | `$FF13` | `$10` / `$20` | **nitro** activation (`$C4` -> `$BC`, `$2C = $0230` timer, `$01A6 |= $8000`); stop at `8EA4` / `A708` |
+| `00:9A92` / `00:B2F4` | `$8017` | 4 / 8 | `$0001` written at `9AA9` / `B30B` (collision/skid loop, stopped when it ends) |
+| `00:D76F`, `D7CB` | `$FF1A`, `$FF19` | 1 | in the car-list walker `00:D726` (other-car effects: passing / engine of an AI car near the player) |
+| `00:A29B`, `00:BAFD` | register value | `$3F` | one-shot with the id taken from a register/table (`$3F` = max-volume param) |
+Engine pitch/volume goes through `$0598/$059D` (`00:8B79`, `00:9B0D`), not through the effect slots. Names of the ids are still unknown (the driver does not name them either; they index the song set's table at SPC `$0400+id*4`).
