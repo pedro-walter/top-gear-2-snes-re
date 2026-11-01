@@ -1,6 +1,6 @@
 #!/usr/bin/env python3 -I
 """Dump the track table (USA: bank 0A:8000, 8 bytes/track, indexed by WRAM $0108 = 4*country+sub).
-entry: +0 ptr (bank 0A), +2 count N, +4 ?, +6 flags.  segment list = N+1 records of 4 bytes (last repeats first), rec[3] = length.
+entry: +0 ptr (bank 0A), +2 count N, +4 ?, +6 flags.  segment list = N+1 records of 4 bytes (last repeats first), rec[3]&3F = curve profile index (NOT length).
 usage: trackdump.py ROM [track ...]"""
 import sys; sys.path.insert(0,__import__('os').path.dirname(__file__))
 from tg2decomp import lorom

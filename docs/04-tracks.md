@@ -57,3 +57,16 @@ Runs once per race (and the minimap code `08:9B75` reads the same records in the
   which is the segment table the player update (`00:8A41`) walks with `sub_009BFD`.
 * `$0120` (0/1/2) chooses which of three bit-fields of the word stream at `09:0000+X` is used (mode set at `00:CD2A`).
 Next: decode the bank-09 tables (curve/slope profiles) and the record bitfields.
+
+## Segment record decode (verified statistically)
+32-bit record = `$40` (bytes 0-1), `$42` (bytes 2-3). Correction: **byte3 is not a length**.
+| field | bits | table (bank 09) | meaning |
+|---|---|---|---|
+| curve | rec[3] & 3F | `09:8000` (64 x 16 words, 32 B each) | per-line curvature profile for a 16-line chunk. 1..33 used; odd = right, even = left (sign flips), 0 = straight. Ramp up / plateau / ramp down shape (e.g. idx 1: 80,160 x13,80) |
+| hill | (rec[2]>>2) & 3F | `09:8800` | per-line slope profile (idx 1..33 hills, e.g. 13 = bump 0,240,720,0,-240) |
+| 3rd | ($41 & 3F0)>>4 | `09:8C40` | 16 equal words, values `0x8xxx` (-32416, -32000 ...) - probably a ground/palette/tile selector, not yet identified |
+| stream | rec[0] bits 6-11 | `09:90C0` word ptr -> stream in `09:xxxx` | run-length / object stream, 10-bit words with 3-bit flag `$0380` (see loop `08:80C4`) |
+| low | rec[0] & 3F | | x16 -> `$46`, used as offset into `09:B1EB` (side-object table, bit15 = "turn marker") |
+Check: summing the curve-profile sums over a lap's records gives about +/-35000..60000 for most tracks (same magnitude = one full
+loop of heading), with all indices <= 33 across all 64 tracks. So the track is: N records x 64 lines, curvature/hill integrated per line.
+Not yet: how the stream loop at `08:80C4` places objects and sets segment length ($3A/$3C counters).
