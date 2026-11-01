@@ -9,8 +9,14 @@
 0102 w mode_flag     tested by the main loop at 01:8145 (bit15 selects the alternate frame path at 01:840B) (?)
 0124 w buf_select    sign selects which of the two HDMA table buffers 0B:8000 builds
 01A4 b speed_mph     player speed as shown on the HUD (a few units ahead of the digits); $0610 holds a finer 16-bit value
-0610 w speed_fine    ~18-21 x the HUD speed (?)
+0610 w speed_fine    = (player speed word at $061D) / 4, copied by 00:D836 from the multiplier result
 0700 w warm_magic1   $1234 written at boot (warm-start check with $0702 = $5678)
 0702 w warm_magic2   $5678
 C400 b car_records   0x40-byte records, 20 of them ($C458/$C498/$C4D8 ... are fields of records 1,2,3 ...), walked by 00:D84B
 FE08 b boot_flag     7E:FE08 tested during boot (selects $99 = $FF/$00)
+0600 b player_page   DP page ($0600) of the player-car physics routine 00:8A41; fields below are DP offsets
+061C b p_speed_lo   $1C-$1E = 24-bit fixed-point speed (word at $061D is the integer part, max ~$1800 at ~84 mph HUD 01A4=$54)
+0614 w p_pos        $14/$16 = 24-bit position along the track, += speed*dt each frame (dt = $00F8, frame step)
+062C w p_boost      $2C/$64/$6C = countdown timers (boost / spin / recovery), decremented by $00F8; $34 = flag bits
+068C w p_gear       $8C = gear/engine index into tables at 80:BE2B/BE33 (acceleration), 80:C633, 80:CA33
+06D4 b p_param      $D4/$D5/$88 = byte multipliers (traction/drag params) fed to the Mode7 multiplier

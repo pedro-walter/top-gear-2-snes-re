@@ -40,3 +40,5 @@
 ;; ~11% of race CPU time; heavy use of the PPU multiplier.
 @088BCA race_frame_b
 ;; Called each race frame together with 008A41/00D726/08CB74/0B8000 (frame pipeline at 01:828B).
+;; 00:8A41 is really the PLAYER CAR UPDATE (physics + movement), not just road scroll: DP=$0600; speed 24-bit at $061C-$061E,
+;; accel from gear tables (80:BE33, 80:C633, 80:CA33), drag from 80:C833 indexed by speed, all via the $211B/$211C multiplier ($2134-36).
