@@ -5,6 +5,7 @@ File offset = `bank*0x8000 + addr - 0x8000`. EUR/JPN differ by small shifts (`to
 | what | bank:addr | file offset | notes |
 |---|---|---|---|
 | Shop prices (x $1000), 10 rows x 4 words (level 0..3): k0 Engine 0,30,50,80; Wet 0,1,2,3; Dry 0,1,2,4; Gearbox 0,10,30,50; Nitro 0,5,15,30; k5 0,1,2,3; armors 0,5,10,20 x3; paint 0 | 1F:AC6F | 0xFAC6F | verified on the shop screens (Engine, Wet, Dry, Gearbox, Nitro) |
+| Shop price **strings** (ASCII, NUL-separated, what the shop draws; rows in the same order: 30000 50000 80000 / 1000 2000 3000 / 1000 2000 4000 / 10000 30000 50000 / 5000 15000 30000 / ...) | 1F:B1C4 | 0xFB1C4 | must be patched together with the words above (the buy routine `1F:AB9E` uses the words, `1F:AB43` draws the strings); keep each string's length |
 | Prize money per finishing place (x $1000): 10,6,4,3,2,1,0... | 1F:EF46 | 0xFEF46 | read at 1F:ED28 |
 | Championship points per place: 10,6,4,3,2,1,0... | 1F:E35D | 0xFE35D | read at 1F:ED13 |
 | Driver names (20, NUL-terminated ASCII) + pointer table | 1F:EFA7 | 0xFEFA7 | ASCII, result-screen text |
@@ -29,3 +30,5 @@ File offset = `bank*0x8000 + addr - 0x8000`. EUR/JPN differ by small shifts (`to
 Not found yet / not data-driven: number of cars (20, hard-coded loops `X = 0x26..0` in `00:D1D4`), starting money (`$1CE1*10` after a password, `1F:CFF4`), the lap count formula (`00:CEB3`, from the track table), the 16 countries x 4 tracks structure (`$1CE5` bit2 test at `1F:ED4C`).
 
 Patch workflow (phase 3): `tools/asm65816.py` for code, `tools/make_ips.py` for the IPS; for quick experiments poke ROM at run time with `emu.write(file_offset, v, emu.memType.snesPrgRom)` (see `scripts/objid.lua`).
+
+**Pipeline tested** (`patches/cheap_shop.txt`): `python3 -I tools/patch.py "roms/Top Gear 2 (USA).sfc" patches/cheap_shop.txt out/cheap.sfc out/cheap.ips` writes the ROM and an IPS of only the changed bytes; `TG_ROM=$PWD/out/cheap.sfc python3 -I tools/run.py ...` boots the patched ROM headless (engine prices show $10000/$20000/$30000 in the shop). Patch files use `BB:AAAA hex...`, `word BB:AAAA v1 v2...` or `@0xFILEOFF hex...` lines.

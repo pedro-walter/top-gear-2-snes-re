@@ -1,0 +1,4 @@
+# test patch (USA): engine upgrades cost $10000 / $20000 / $30000 instead of $30000 / $50000 / $80000.
+# Two places: the price words (x $1000, read when buying) and the ASCII price strings drawn in the shop (NUL separated, same length).
+word 1F:AC71  10 20 30
+1F:B1C4  31 30 30 30 30 00 32 30 30 30 30 00 33 30 30 30 30     # "10000" "20000" "30000"
