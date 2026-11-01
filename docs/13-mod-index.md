@@ -32,3 +32,19 @@ Not found yet / not data-driven: number of cars (20, hard-coded loops `X = 0x26.
 Patch workflow (phase 3): `tools/asm65816.py` for code, `tools/make_ips.py` for the IPS; for quick experiments poke ROM at run time with `emu.write(file_offset, v, emu.memType.snesPrgRom)` (see `scripts/objid.lua`).
 
 **Pipeline tested** (`patches/cheap_shop.txt`): `python3 -I tools/patch.py "roms/Top Gear 2 (USA).sfc" patches/cheap_shop.txt out/cheap.sfc out/cheap.ips` writes the ROM and an IPS of only the changed bytes; `TG_ROM=$PWD/out/cheap.sfc python3 -I tools/run.py ...` boots the patched ROM headless (engine prices show $10000/$20000/$30000 in the shop). Patch files use `BB:AAAA hex...`, `word BB:AAAA v1 v2...` or `@0xFILEOFF hex...` lines.
+
+## Same tables in Europe and Japan (found by byte-pattern search; contents identical)
+| table | USA | EUR | JPN |
+|---|---|---|---|
+| price words (x $1000) | 1F:AC6F | 1F:ACB5 | 1F:ACB5 |
+| price strings | 1F:B1C4 | 1F:B207 | 1F:B20A |
+| points per place | 1F:E35D | 1F:E3CC | 1F:E63B |
+| prize per place (x $1000) | 1F:EF46 | 1F:F5F3 | 1F:F862 |
+| driver names | 1F:EFA7 | 1F:F654 | 1F:F8C3 |
+| engine curves | 00:BE33 | 00:BEBC | 00:BEBC |
+| gear ratio / accel bytes | 00:BDFB / 00:BE13 | 00:BE84 / 00:BE9C | 00:BE84 / 00:BE9C |
+| drag (high speed) | 00:CA33 | 00:CABC | 00:CABC |
+| button masks (control types) | 00:D048 | 00:D0D1 | 00:D0D1 |
+| `D036` car-setup tables | 00:D036 | 00:D0BF | 00:D0BF |
+| track table | 0A:8000 | 0A:8000 | 0A:8000 |
+(Bank 00 tables sit `+0x89` later in EUR/JPN: the code before them is 137 bytes longer; bank 0A is unchanged.)
