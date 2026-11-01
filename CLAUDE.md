@@ -40,6 +40,13 @@ Profiling: `--lua scripts/pchist.lua` (env TG_PF_FROM/TG_PF_TO) then `tools/prof
 Decompressors are ported (`tools/tg2decomp.py`, `tools/gfxdump.py`, notes in `docs/02-compression.md`).
 Watch addresses use the **FastROM mirror** the CPU executes (e.g. `81839A:x`, not `01839A`); WRAM is `7E....` or `0000..1FFF`. `--load` of a savestate in a fresh run looked like it restarted the game (menu code ran) - unverified, re-run the preset instead.
 
+## Newer tools (phase 2)
+* `tools/champ.sh VER FRAMES TAG` + `scripts/champ.lua`: championship autopilot (forces 1 lap, identity standings) to reach results/championship/next-race screens; **`--trace` runs die after ~20000 frames** (Mesen exits with rc 255; use several runs and merge). Never poke `7E:FE00-FFFF` outside a race.
+* `tools/patch.py ROM patchfile out.sfc [out.ips]` + `patches/*.txt` (tested end to end, `docs/13-mod-index.md`); boot a patched ROM with `TG_ROM=path python3 -I tools/run.py ...`.
+* `tools/spc700.py` (SPC700 disassembler), `scripts/spcdump.lua` (SPC RAM/DSP dump), `scripts/declog.lua` + `tools/declogdump.py` (log + decompress every run-time asset load), `tools/password.py`, `tools/portsyms.py`.
+* Front-end variables live at `9F:xxxx` (bank 9F low mirror of WRAM): watch `9F1D19`, not `001D19`/`7E1D19`. Second controller input does not reach the game through Lua `setInput(.,1)` (2P menus not reachable yet).
+* Docs: `docs/10-game-flow.md` (results/prizes), `11-assets.md`, `12-race-session.md`, `13-mod-index.md` (where to change what).
+
 ## Conventions
 * Keep notes in `docs/NN-topic.md` as findings are verified (like snes-rea). Hand-verified labels go in `disasm/names_<ver>.txt`.
 * Never commit ROMs or derived data; patches only as IPS of our bytes.
