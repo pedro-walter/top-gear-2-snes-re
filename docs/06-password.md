@@ -14,3 +14,5 @@ Pressing "end" -> `1F:CFB9` copies the 22 chars to `$1780..`, calls `sub_1FD4B3`
 ## Test
 `tools/password.py encode country4=36 difficulty=1 a_money?=100` -> `64PB<RFPBT9W5M5YTMHG66`; injecting it at `1F:CFB9` (`scripts/pwtest.lua`, `TG_PW=...`) gives `$1CE3=9, $1CDD=1` (all 10 countries unlocked, difficulty 1).
 (Typing it by hand: cursor starts on "end"; the injection avoids navigating the grid.)
+
+EUR/JPN: the same 22-byte KEY table exists in both (file offsets 0xFD9F1 EUR, 0xFDC68 JPN vs 0xFD7F9 USA), so the algorithm is shared; addresses differ, passwords are probably interchangeable (untested).

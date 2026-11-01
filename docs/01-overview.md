@@ -53,3 +53,7 @@ Double buffering: the sign of `$0124` selects the table buffer (`7E:AD7E`-ish vs
 2. Port the decompressor, then dump the compressed banks to find tiles/tilemaps/music; identify the track data format (`09/0A/10/11`?).
 3. Understand car physics: where steering/acceleration is computed (look for writers of `$01A4/$0610`), AI cars, collisions.
 4. Locate the SPC700 upload (`1F:F23A` compares `#$BBAA`).
+
+## Doc index (phase 2)
+`02-compression.md` decompressors - `03-physics.md` player physics - `04-tracks.md` unlock poke, track table, road builder, segment records, difficulty `$0120` -
+`05-ai-cars.md` AI car records/update/setup - `06-password.md` password codec (`tools/password.py`).
