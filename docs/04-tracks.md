@@ -46,3 +46,14 @@ The 64 KB stream `07:8006` is loaded for every country (common). Nothing is deco
 
 ## Tools
 `scripts/unlock.lua` (poke `$1CE3`), `scripts/mvnlog.lua` (logs every MVN/MVP: frame pc A X Y dst src), `tools/tilesheet.py` (`sheet(bytes, png)` 4bpp grey tile sheet).
+
+## Road builder `08:801C` (first look)
+Runs once per race (and the minimap code `08:9B75` reads the same records in the track-info screen). With `X = $0108*8`:
+* `$010A = N << 6` (segment count x 64, from `0A:8002`), `$3E = $24 = ptr` (`0A:8000`).
+* Loop per segment: `$40/$42` = the segment record (words at `0A:ptr`, `ptr+2`); `X = (ptr-$24)>>2` = segment index.
+* `7E:6200,X` (byte per segment) is the stream `09:DAB5..` - e.g. 13 bytes for Auckland's 13 segments, so these 09:Dxxx streams are **per-segment attribute bytes**; `$22` takes it.
+* The record is bit-packed indices into lookup tables in bank 09: `$42 & $3F00` -> `09:8000`, `$42 & $FC` -> `09:8800` (words), `($41&$3F0)` -> `09:8C40`, `$40 & $FC0` -> `09:90C0` (+3 = run length `$44`);
+  `$40 & $3F` x16 -> `$46`. Results are written to the 16-byte-per-line table at `7E:9000,Y` / `7E:9200,Y` (Y = (0x20 - $3A) x 16, two copies),
+  which is the segment table the player update (`00:8A41`) walks with `sub_009BFD`.
+* `$0120` (0/1/2) chooses which of three bit-fields of the word stream at `09:0000+X` is used (mode set at `00:CD2A`).
+Next: decode the bank-09 tables (curve/slope profiles) and the record bitfields.
