@@ -95,3 +95,74 @@ So the road builder's 3 views of the `09:xxxx` word stream (10-bit fields at bit
 
 ### Object id experiment (ROM poke)
 `scripts/objid.lua` (env `TG_ID`, `TG_CAT`, `TG_NSETS`) overwrites the descriptor of one category in the first scenery sets of `09:B1EB` at frame 1 (`emu.write(file_offset, v, emu.memType.snesPrgRom)` really changes what the CPU reads; file offset of `09:B1EB` = `0x4B1EB`). Rewriting more than ~8 rows (`TG_NSETS=64`) blacks out the game (rows beyond the used ones overlap other data), 8 is safe. Result on Auckland (category 2 in the start segment): id `0x10` draws nothing, `0x2C` and `0x4B` draw a **tyre stack** at the left roadside (seen close to the car at frame 3250 only: at the start line all objects are too small to distinguish). To catalogue ids, take the screenshots later in a lap or place the car with `$14/$16` (position) before shooting.
+
+## All 64 tracks (from `0A:8000`, USA)
+
+| track | country | race | segments | laps | class (+6 &7) | +6 | +7 |
+|---|---|---|---|---|---|---|---|
+| 0 | Australasia | 1 | 13 | 5 | 2 | 02 | 00 |
+| 1 | Australasia | 2 | 13 | 5 | 2 | 02 | 00 |
+| 2 | Australasia | 3 | 17 | 4 | 6 | 06 | 00 |
+| 3 | Australasia | 4 | 37 | 2 | 3 | 03 | FF |
+| 4 | Britain | 1 | 19 | 4 | 5 | 05 | 00 |
+| 5 | Britain | 2 | 20 | 4 | 2 | 02 | 00 |
+| 6 | Britain | 3 | 32 | 3 | 2 | 02 | 00 |
+| 7 | Britain | 4 | 25 | 3 | 2 | 02 | 00 |
+| 8 | Canada | 1 | 16 | 5 | 2 | 02 | 00 |
+| 9 | Canada | 2 | 31 | 3 | 3 | 03 | FF |
+| 10 | Canada | 3 | 33 | 2 | 2 | 02 | 00 |
+| 11 | Canada | 4 | 31 | 3 | 6 | 06 | FF |
+| 12 | Egypt | 1 | 8 | 9 | 2 | 02 | 00 |
+| 13 | Egypt | 2 | 10 | 7 | 2 | 02 | 00 |
+| 14 | Egypt | 3 | 13 | 5 | 6 | 06 | 00 |
+| 15 | Egypt | 4 | 19 | 4 | 2 | 02 | 00 |
+| 16 | France | 1 | 13 | 5 | 2 | 02 | 00 |
+| 17 | France | 2 | 22 | 3 | 6 | 06 | 00 |
+| 18 | France | 3 | 27 | 3 | 2 | 02 | 00 |
+| 19 | France | 4 | 30 | 3 | 3 | 03 | FF |
+| 20 | Germany | 1 | 14 | 5 | 3 | 03 | FF |
+| 21 | Germany | 2 | 23 | 3 | 2 | 02 | 00 |
+| 22 | Germany | 3 | 19 | 4 | 5 | 05 | 00 |
+| 23 | Germany | 4 | 32 | 3 | 4 | 04 | 00 |
+| 24 | Greece | 1 | 12 | 6 | 6 | 06 | FF |
+| 25 | Greece | 2 | 29 | 3 | 2 | 02 | 00 |
+| 26 | Greece | 3 | 30 | 3 | 2 | 02 | 00 |
+| 27 | Greece | 4 | 29 | 3 | 2 | 02 | 00 |
+| 28 | India | 1 | 10 | 7 | 2 | 02 | 00 |
+| 29 | India | 2 | 16 | 5 | 2 | 02 | 00 |
+| 30 | India | 3 | 24 | 3 | 2 | 02 | 00 |
+| 31 | India | 4 | 28 | 3 | 2 | 02 | 00 |
+| 32 | Ireland | 1 | 18 | 4 | 2 | 02 | 00 |
+| 33 | Ireland | 2 | 15 | 5 | 2 | 02 | 00 |
+| 34 | Ireland | 3 | 21 | 4 | 3 | 03 | FF |
+| 35 | Ireland | 4 | 21 | 4 | 2 | 02 | 00 |
+| 36 | Italy | 1 | 19 | 4 | 2 | 02 | 00 |
+| 37 | Italy | 2 | 27 | 3 | 2 | 02 | 00 |
+| 38 | Italy | 3 | 29 | 3 | 6 | 06 | 00 |
+| 39 | Italy | 4 | 27 | 3 | 2 | 02 | 00 |
+| 40 | Japan | 1 | 22 | 3 | 2 | 02 | 00 |
+| 41 | Japan | 2 | 33 | 2 | 6 | 06 | FF |
+| 42 | Japan | 3 | 35 | 2 | 2 | 02 | 00 |
+| 43 | Japan | 4 | 30 | 3 | 2 | 02 | 00 |
+| 44 | Scandinavia | 1 | 17 | 4 | 2 | 02 | 00 |
+| 45 | Scandinavia | 2 | 20 | 4 | 4 | 04 | 00 |
+| 46 | Scandinavia | 3 | 24 | 3 | 4 | 04 | 00 |
+| 47 | Scandinavia | 4 | 24 | 3 | 5 | 05 | 00 |
+| 48 | SouthAmerica | 1 | 19 | 4 | 2 | 02 | 00 |
+| 49 | SouthAmerica | 2 | 27 | 3 | 2 | 02 | 00 |
+| 50 | SouthAmerica | 3 | 33 | 2 | 2 | 02 | 00 |
+| 51 | SouthAmerica | 4 | 29 | 3 | 6 | 06 | 00 |
+| 52 | Spain | 1 | 10 | 7 | 2 | 02 | 00 |
+| 53 | Spain | 2 | 14 | 5 | 6 | 06 | FF |
+| 54 | Spain | 3 | 28 | 3 | 3 | 03 | FF |
+| 55 | Spain | 4 | 25 | 3 | 2 | 02 | 00 |
+| 56 | Switzerland | 1 | 19 | 4 | 2 | 02 | 00 |
+| 57 | Switzerland | 2 | 21 | 4 | 2 | 02 | 00 |
+| 58 | Switzerland | 3 | 26 | 3 | 6 | 06 | 00 |
+| 59 | Switzerland | 4 | 34 | 2 | 4 | 04 | 00 |
+| 60 | UnitedStates | 1 | 26 | 3 | 6 | 06 | 00 |
+| 61 | UnitedStates | 2 | 25 | 3 | 2 | 02 | 00 |
+| 62 | UnitedStates | 3 | 35 | 2 | 4 | 04 | 00 |
+| 63 | UnitedStates | 4 | 29 | 3 | 5 | 05 | 00 |
+
+Country order (`1F:DB32`, `$1CE1` / `$0108>>2`): Australasia, Britain, Canada, Egypt, France, Germany, Greece, India, Ireland, Italy, Japan, Scandinavia, South America, Spain, Switzerland, United States (16 x 4 races). Race 3 of Australasia is a night race (class 6), race 4 has 37 segments and 2 laps (class 3 = wet tyres). `+7 = FF` marks the final race of a country on the first tracks (meaning unverified). The class byte also picks the sky/palette set (class 2 = daytime desert, 5 = ?; not decoded).
