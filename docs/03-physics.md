@@ -24,3 +24,13 @@ Open: what `$34` bits mean, the `$D4/$D5/$88` parameters per car model (car-shop
   * gearbox 3: 64 77 89 102 114 127 (6)
   This matches `$06C0` going 5 -> 7 (rows include the 0xE0 entry, and `$06C0` = gears+1 for level 0..3: 5,6,6,7).
   `$30` = current gear index; the ratio is used as the 8-bit multiplier operand against speed (`$1D/$1E`) at `00:8CAE` etc.
+
+### Per-gear tables: `$D4` and `$D5` (`00:8D95..8DAC`)
+After a gear change the game loads `X = 80:BDF3[$8A*2] + $30` (gearbox level, current gear) and sets `$D4 = 80:BDFB[X]` (**gear ratio**: speed -> engine rpm scale, used as the multiplier operand at `8CAE`) and `$D5 = 80:BE13[X]` (**acceleration multiplier** of that gear, the `$D5` in the `00:8F8B` product with the curve value). Rows (`$30` = 0 is neutral/launch):
+| gearbox | `$D4` ratio | `$D5` accel |
+|---|---|---|
+| 0 | E0 40 4D 5A 67 | 127 112 40 25 17 |
+| 1 | E0 40 4B 56 61 6F | 127 112 46 29 22 16 |
+| 2 | E0 40 4D 5B 68 76 | 127 112 48 24 18 15 |
+| 3 | E0 40 4D 59 66 72 7F | 127 112 52 28 22 16 14 |
+So a better gearbox adds gears and slightly raises the top-gear multipliers. `$94` (tyre grip) scales the cornering term; the "per-car constants" `$7A..$86` are **button masks** (see `09-car-setup.md`).
