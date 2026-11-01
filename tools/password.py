@@ -8,10 +8,10 @@ ROMALPHA = bytes.fromhex('42 43 44 46 47 48 4a 4c 4d 4e 50 51 52 54 56 57 59 31 
 KEY = bytes.fromhex('0d051a141a0e1707160d0c1606130d1b1d1b1d1f1200')
 # (radix, name) in decode order; name -> destination word
 FIELDS = [(0x6D, 'checksum'), (2, 'f17D1_music'), (0x41, 'country4'), (3, 'difficulty'), (0x500, 'p2_money'), (10, 'p2_car'),
-          (2, 'p2_manual'), (8, 'p2_x8'), (5, 'p2_up8'), (5, 'p2_up7'), (5, 'p2_up6'), (4, 'p2_up5'), (4, 'p2_nitro'), (4, 'p2_gearbox'),
+          (2, 'p2_manual'), (8, 'p2_paint'), (5, 'p2_armor3'), (5, 'p2_armor2'), (5, 'p2_armor1'), (4, 'p2_gas'), (4, 'p2_nitro'), (4, 'p2_gearbox'),
           (4, 'p2_dry'), (4, 'p2_wet'), (4, 'p2_engine'),
-          (0x500, 'p1_money'), (10, 'p1_car'), (2, 'p1_manual'), (8, 'p1_x8'), (5, 'p1_up8'), (5, 'p1_up7'), (5, 'p1_up6'),
-          (4, 'p1_up5'), (4, 'p1_nitro'), (4, 'p1_gearbox'), (4, 'p1_dry'), (4, 'p1_wet'), (4, 'p1_engine')]
+          (0x500, 'p1_money'), (10, 'p1_car'), (2, 'p1_manual'), (8, 'p1_paint'), (5, 'p1_armor3'), (5, 'p1_armor2'), (5, 'p1_armor1'),
+          (4, 'p1_gas'), (4, 'p1_nitro'), (4, 'p1_gearbox'), (4, 'p1_dry'), (4, 'p1_wet'), (4, 'p1_engine')]
 def stored(name, v):   # value as stored in the word table that the checksum sums
     if name == 'country4': return v >> 2
     if name.endswith('car?') : return ((v - 5) | 0x8000) if v >= 5 else v

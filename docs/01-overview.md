@@ -59,3 +59,4 @@ Double buffering: the sign of `$0124` selects the table buffer (`7E:AD7E`-ish vs
 `05-ai-cars.md` AI car records/update/setup - `06-password.md` password codec (`tools/password.py`).
 * `docs/07-versions.md` - USA/EUR/JPN address map and password compatibility
 * `docs/08-sound.md` - SPC700 upload, song table (first look)
+* `docs/09-car-setup.md` - shop state -> physics variables (00:CD5E)
