@@ -22,8 +22,8 @@
 ;; Second decompressor variant (17 callers), same register convention, its own handler table at 01:DEC2.
 
 # ---------------------------------------------------------------- race frame
-@008A42 road_scroll_calc
-;; Per-frame road geometry (DP=$0600): scroll/perspective maths using the PPU multiplier ($211B/$211C -> $2134-36).
+@008A42 player_car_update
+;; Per-frame PLAYER car update (DP=$0600): physics (accel curve 80:BE33 by engine level, gear ratios 80:BDFB, drag), position along the track, collisions.  docs/03-physics.md
 @00D7C6 car_list_update
 ;; Updates the car/object records (see ram.txt: 0x40-byte records at 7E:C400...).
 @00D8EB car_dispatch_0
@@ -42,3 +42,46 @@
 ;; Called each race frame together with 008A41/00D726/08CB74/0B8000 (frame pipeline at 01:828B).
 ;; 00:8A41 is really the PLAYER CAR UPDATE (physics + movement), not just road scroll: DP=$0600; speed 24-bit at $061C-$061E,
 ;; accel from gear tables (80:BE33, 80:C633, 80:CA33), drag from 80:C833 indexed by speed, all via the $211B/$211C multiplier ($2134-36).
+
+# ---------------------------------------------------------------- race session (docs/12-race-session.md)
+@018148 race_session_start
+;; 1P race start: 00:CD09 (track number), 00:CD5E car setup, 00:D0DA AI setup, first road_render/hdma_build, HDMA programming, then the frame loop.  2P variant at 01:840B.
+# UNMATCHED 018272 race_frame_loop (no match)
+;; Frame loop: wait $0122, dt=$F8, 01:83BF pause/quit test, 00:8A41 player, 00:D726 cars, 08:8BCA, 08:CB74 render, 0B:8000 HDMA, finish logic, exit via JML [$0076].
+# UNMATCHED 0183BF race_pause_quit (ambiguous)
+;; Start edge ($0030 bit12) pauses; L+R held while paused returns carry set = quit.
+@00CD92 race_track_number
+;; Derives the track number ($0108) for the race from the country/race index.
+@00CDE7 car_setup
+;; Turns the shop levels of each player into the physics variables ($068C engine, $0698, $06C0 gears...).  docs/09-car-setup.md
+# UNMATCHED 00D0DA race_ai_setup (no match)
+;; Per-race setup incl. AI car records (D1D4).  docs/05-ai-cars.md
+@00DF3B car_lap_finish
+;; Lap counter +0x22 of a car; at $019E laps the car finishes: id -> 7E:FE9E[$06EE], time -> 7E:FEC6, placement for results.
+# UNMATCHED 00E6F8 player_finish_cruise (ambiguous)
+;; Switches P1 to handler 0x0A (coast to a stop) after finishing.
+@01DA5C sound_mailbox
+;; Once per frame (DP=$0500): sends up to four 4-byte commands to the SPC700 through ports $2140-43.  docs/08-sound.md
+# UNMATCHED 01E25B rng (no match)
+;; Random number generator.
+# ---------------------------------------------------------------- front-end flow (docs/10-game-flow.md)
+@1F8014 frontend_reentry
+;; Front-end entry after a race (vector stored at $1DED/$1DEF): checks $1DF1/$1D9D, runs the results screen, shop or title.
+# UNMATCHED 1F81D4 load_persistent_state (no match)
+;; Reloads $1CD7+ from the 7E:FE00 mirror and adds the carried prize ($1D71/$1D73) to the money words.
+# UNMATCHED 1FEB7C results_screen (no match)
+;; RACE RESULTS: finds P1/P2 in the finishing order $1D75, qualifies if rank < 10, prize 9F:EF46[rank] x $1000, points 9F:E35D[rank].
+# UNMATCHED 1FED48 next_race_advance (no match)
+;; $1CE5++ ; after 4 races -> next country ($1CE1++), snapshot (1FDA3C); 16 countries = game complete.
+# UNMATCHED 1FDA3C snapshot_shop_state (ambiguous)
+;; Backs up the shop state to $1D45-$1D6F at the start of a country.
+# UNMATCHED 1FDA69 restore_shop_state (ambiguous)
+;; Restores $1D03.. / money from the snapshot.
+@1FBF53 decomp_b_frontend
+;; Bank-1F copy of the variant B decompressor (same format as 01:DE85), jump table 1F:BF2F.  docs/11-assets.md
+@1FF8E0 spc_ipl_upload
+;; Standard SPC700 IPL block upload.
+@1FF753 load_song
+;; Loads a song / sound set (bank 1B table).  docs/08-sound.md
+@1FD6AB password_validate
+;; Validates a password (docs/06-password.md).
