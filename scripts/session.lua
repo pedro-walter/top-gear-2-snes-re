@@ -83,10 +83,10 @@ emu.addEventCallback(function()
   if shots[f] then R.shot(f) end
   if dumps[f] then dumpall(f) end
   if states[f] then local fh=io.open(OUT..TAG.."_"..f..".mss","wb") fh:write(emu.createSavestate()) fh:close() end
+  if os.getenv("TG_TRACE")=="1" and (f%4000==0 or f>=MAXF) then   -- periodic flush: long runs may hit the timeout
+    local fh=io.open(OUT..TAG.."_trace.txt","w") fh:write(table.concat(order,"\n"),"\n") fh:close()
+  end
   if f>=MAXF then
-    if os.getenv("TG_TRACE")=="1" then
-      local fh=io.open(OUT..TAG.."_trace.txt","w") fh:write(table.concat(order,"\n"),"\n") fh:close()
-    end
     if wlog then wlog:close() end
     if on_finish then on_finish() end
     emu.stop(0)

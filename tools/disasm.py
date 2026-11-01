@@ -141,6 +141,22 @@ def decode(rom, a, m, x):
 ENDS = {"RTS", "RTL", "RTI", "JMP", "JML", "BRA", "BRL", "STP", "BRK"}
 
 
+def plausible(rom, a, m, x, n=8):
+    """Linear-decode up to n instructions from a: reject BRK/COP/WDM/STP or undecodable bytes (guards heuristic seeds)."""
+    for _ in range(n):
+        ins = decode(rom, a, m, x)
+        if ins is None or ins.op in (0x00, 0x02, 0x42, 0xDB):
+            return False
+        if ins.mn == "REP":
+            m, x = (0 if ins.operand & 0x20 else m), (0 if ins.operand & 0x10 else x)
+        elif ins.mn == "SEP":
+            m, x = (1 if ins.operand & 0x20 else m), (1 if ins.operand & 0x10 else x)
+        if ins.mn in ENDS:
+            return True
+        a += ins.len
+    return True
+
+
 def explore(rom, seeds):
     code = {}                       # addr -> Insn (first decode wins)
     covered = {}                    # byte addr -> insn start
@@ -190,6 +206,22 @@ def explore(rom, seeds):
                     work.append((ins.target, nm, nx, stk))
             elif mn in ("JMP", "JML", "JSR") and ins.mode in ("absind", "absindx", "absindl"):
                 jumptables.append((a, mn))
+                if ins.mode == "absindx":
+                    # heuristic: table of in-bank code pointers starting at the operand; stop at the first word that is
+                    # not a plausible code address (<$8000, inside the table itself, or in the middle of known code)
+                    base = (a & 0xFF0000) | ins.operand
+                    for k in range(128):
+                        lo, hi = rom.rd(base + 2 * k), rom.rd(base + 2 * k + 1)
+                        if lo is None or hi is None:
+                            break
+                        w = lo | hi << 8
+                        t = (a & 0xFF0000) | w
+                        if w < 0x8000 or base <= t < base + 2 * (k + 1) or t in covered and covered[t] != t:
+                            break
+                        if not plausible(rom, t, m, x):
+                            break
+                        labels[t].add("jmp")
+                        work.append((t, m, x, ()))
             if mn in ENDS:
                 break
             a += ins.len

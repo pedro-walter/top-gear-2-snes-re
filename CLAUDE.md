@@ -1,7 +1,7 @@
 # Top Gear 2 (SNES) reverse engineering
 
 Sister project of `../snes-rea` (Top Gear 1; read its `docs/` and `README.md` for method, 65816 conventions and the
-randomizer/assembler workflow). Phases: **1 environment (done)**, 2 understand the code, 3 modify it.
+randomizer/assembler workflow). Phases: **1 environment (done)**, 2 understand the code (in progress, see `docs/01-overview.md`), 3 modify it.
 
 ## ROMs (`roms/`, gitignored, 1 MB LoROM FastROM `$30`, no header, no SRAM)
 | ver | file | `--ver` | country byte | checksum |
@@ -33,7 +33,10 @@ Mesen2 `--testRunner` + Lua, binary in `tools/mesen/` (copied from snes-rea; git
 adapting to TG2's differences (1 MB, different data layout).
 
 ## Make targets
-`make smoke | race VER=eur | trace VER=jpn | disasm VER=usa`
+`make smoke | race VER=eur | trace VER=jpn | merge VER=usa | disasm VER=usa`
+Coverage workflow: `make trace` (base race trace + WRAM image) -> `tools/fuzz.sh VER menu|race SEEDS` (extra traces `out/f_<ver>_*`) -> `make merge` -> `make disasm`.
+Profiling: `--lua scripts/pchist.lua` (env TG_PF_FROM/TG_PF_TO) then `tools/prof.py out/<tag>_pchist.txt disasm/tg2_usa.asm`; `scripts/bankprof.lua` for per-bank usage.
+Watch addresses use the **FastROM mirror** the CPU executes (e.g. `81839A:x`, not `01839A`); WRAM is `7E....` or `0000..1FFF`. `--load` of a savestate in a fresh run looked like it restarted the game (menu code ran) - unverified, re-run the preset instead.
 
 ## Conventions
 * Keep notes in `docs/NN-topic.md` as findings are verified (like snes-rea). Hand-verified labels go in `disasm/names_<ver>.txt`.

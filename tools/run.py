@@ -31,7 +31,7 @@ root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 env = dict(os.environ, TG2_VER=a.ver, TG_FRAMES=str(a.frames), TG_INPUT=a.input, TG_SHOTS=a.shots, TG_DUMPS=a.dumps,
            TG_STATE=a.state, TG_TAG=a.tag, TG_TRACE='1' if a.trace else '0')
 for k, v in (('TG_LOAD', a.load), ('TG_WATCH', a.watch), ('TG_LUA', a.lua)):
-    if v: env[k] = os.path.abspath(v)
+    if v: env[k] = v if k == 'TG_WATCH' else os.path.abspath(v)
 os.makedirs(os.path.join(root, 'out'), exist_ok=True)
 p = subprocess.run([os.path.join(root, 'tools/mesen.sh'), os.path.join(root, 'scripts/session.lua')], env=env, capture_output=True, text=True)
 for l in (p.stdout + p.stderr).splitlines():

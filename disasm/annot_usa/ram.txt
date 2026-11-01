@@ -1,0 +1,16 @@
+# WRAM variables (USA; CPU view). Format: ADDR size name  description.  (?) = inferred only.
+0000 w nmi_stub      JML stub the native NMI vector ($FFEA -> $0000) jumps through: JML $81E2F2
+0004 w irq_stub      JML stub for IRQ
+0008 w cop_stub      JML stub for COP
+001A w frame_counter incremented by the NMI handler every frame ($1C too)
+0022 w nmi_copy      copy of $0122 made at NMI start
+0058 w fade_a        screen fade value (low 12 bits, bit15 flag); stepped by $5B each NMI, limit $0F00
+005D w fade_b        second fade value, stepped by $60
+0102 w mode_flag     tested by the main loop at 01:8145 (bit15 selects the alternate frame path at 01:840B) (?)
+0124 w buf_select    sign selects which of the two HDMA table buffers 0B:8000 builds
+01A4 b speed_mph     player speed as shown on the HUD (a few units ahead of the digits); $0610 holds a finer 16-bit value
+0610 w speed_fine    ~18-21 x the HUD speed (?)
+0700 w warm_magic1   $1234 written at boot (warm-start check with $0702 = $5678)
+0702 w warm_magic2   $5678
+C400 b car_records   0x40-byte records, 20 of them ($C458/$C498/$C4D8 ... are fields of records 1,2,3 ...), walked by 00:D84B
+FE08 b boot_flag     7E:FE08 tested during boot (selects $99 = $FF/$00)

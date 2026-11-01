@@ -1,0 +1,4 @@
+# Inline comments: "BBAAAA text"
+018008 boot: native mode, forced blank, wait 2 vblanks
+01803E init: JSR 01F7FD then JML 1F:8000 (front-end)
+018145 main race/frame sequence starts here (called after front-end launches a race)

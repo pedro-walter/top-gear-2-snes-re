@@ -7,6 +7,8 @@ race:             ## boot to a race, save state at frame 3000 -> out/race_$(VER)
 trace:            ## coverage trace + WRAM dump of ~8000 frames -> out/trace_$(VER).txt, out/wram_$(VER).bin
 	python3 -I tools/run.py --ver $(VER) --preset race --frames 8000 --tag t_$(VER) --trace --input "3000:x:5000" --dumps 8000
 	cp out/t_$(VER)_trace.txt out/trace_$(VER).txt; cp out/t_$(VER)_8000.wram out/wram_$(VER).bin
+merge:            ## union of all coverage traces (trace_VER + fuzz runs f_VER_*) -> out/merged_$(VER).txt
+	python3 -I tools/merge_traces.py "$$(tools/rompath.sh $(VER))" out/merged_$(VER).txt out/trace_$(VER).txt out/f_$(VER)_*_trace.txt
 disasm:           ## disassemble from ROM + trace + WRAM image -> disasm/tg2_$(VER).asm
-	python3 -I tools/disasm.py "$$(tools/rompath.sh $(VER))" disasm/tg2_$(VER).asm --seeds out/trace_$(VER).txt --wram out/wram_$(VER).bin --names disasm/names_$(VER).txt --annot disasm/annot
-.PHONY: smoke race trace disasm
+	python3 -I tools/disasm.py "$$(tools/rompath.sh $(VER))" disasm/tg2_$(VER).asm --seeds out/merged_$(VER).txt --wram out/wram_$(VER).bin --names disasm/names_$(VER).txt --annot disasm/annot_$(VER)
+.PHONY: smoke race trace merge disasm
