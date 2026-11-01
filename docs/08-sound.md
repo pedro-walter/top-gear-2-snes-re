@@ -16,3 +16,4 @@
   3. `$A1..$A3,$A5` (id in `$A1`, params `$A2,$A5`, `$A3`) and 4. `$A7..$A9,$AB`.
 * After sending, `$9A=$FF`, `$A1/$A7` are cleared (slots are one-shot) and ports 0/2 are zeroed. So any code that wants a sound just stores an id into `$05A1` / `$05A7` etc. (SFX queue) and the frame mailbox forwards it.
 * The `$2140-$2143` write callback did not fire in this Mesen build (APU I/O callbacks seem not to be delivered); use `exec` callbacks at the STA sites above if you need to log commands.
+* Sample of a 1000-frame acceleration run (`scripts/sfxlog.lua`): slot 0 port-0 byte alternates `84/94` (bit 4 = the double-buffer toggle), slot 2 is mostly `00`/`06` (id 6 ~ 630 times: a repeated effect, probably the engine loop retrigger) and ids `0x10..0x19` appear 10-100 times each (likely engine pitch/gear steps, more at higher numbers), `0x0E`, `0x07` rarely. Names unverified.
