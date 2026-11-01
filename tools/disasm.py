@@ -86,10 +86,10 @@ class Rom:
 
     def rd(self, a):
         b = a >> 16
-        if b in (0x7E, 0x7F) or (b == 0 and (a & 0xFFFF) < 0x2000):
+        if b in (0x7E, 0x7F) or ((b & 0x7F) < 0x40 and (a & 0xFFFF) < 0x2000):
             if self.wram is None:
                 return None
-            return self.wram[((b & 1) << 16 | (a & 0xFFFF)) if b else (a & 0xFFFF)]
+            return self.wram[((b & 1) << 16 | (a & 0xFFFF)) if b in (0x7E, 0x7F) else (a & 0xFFFF)]
         f = l2f(a)
         if f is None or f >= self.size:
             return None
@@ -133,7 +133,8 @@ def decode(rom, a, m, x):
     elif mode == "abs" and mn in ("JSR", "JMP"):
         i.target = (bank << 16) | val
     elif mode in ("long",) and mn in ("JSL", "JML"):
-        i.target = val
+        # TG2 is FastROM: code jumps through the $80-$FF mirrors; fold them onto $00-$7F so labels match the listing
+        i.target = val & 0x7FFFFF if (val >> 16) >= 0x80 and (val & 0xFFFF) >= 0x8000 else val
     return i
 
 
@@ -373,7 +374,7 @@ def main():
     # native vectors: assume 16-bit (game switches to native early); decode both 8/16 is noisy -> 8-bit
     for k in ("NMI_N", "IRQ_N", "COP_N", "BRK_N"):
         v = vec[k]
-        if v and v >= 0x8000:
+        if v and (v >= 0x8000 or (v < 0x2000 and args.wram)):   # vectors < $2000 point at WRAM stubs
             seeds.append((v, 0, 0))
     if args.seeds:
         seeds += read_seeds(args.seeds)
@@ -383,10 +384,14 @@ def main():
         b, o = a >> 16, a & 0xFFFF
         if b in (0x7E, 0x7F):
             return (a, m, x) if rom.wram else None
-        if b == 0 and o < 0x2000:
+        if (b & 0x7F) < 0x40 and o < 0x2000:   # WRAM mirror in banks 00-3F / 80-BF
             return (0x7E0000 | o, m, x) if rom.wram else None
         return (a & 0x7FFFFF, m, x) if o >= 0x8000 else None
     seeds = [c for c in map(canon, seeds) if c]
+    if rom.wram:   # JML/JSL stubs in the first bytes of WRAM (vectors point here); follow every one
+        for o in range(0, 0x20):
+            if rom.wram[o] in (0x5C, 0x22) and rom.wram[o + 3] in (0x01, 0x81) or rom.wram[o] == 0x22 and rom.wram[o + 3] >= 0x80:
+                seeds.append((0x7E0000 | o, 0, 0))
     names = {}
     if args.names:
         for ln in open(args.names):
@@ -553,9 +558,19 @@ def main():
             f.write("\n\n; " + "=" * 78 + "\n; ===== bank $%02X =====  %s\n; " % (b, an.banks.get(b, "")) + "=" * 78 + "\n")
             emit_range(f, base, base + 0x8000, "rom")
         if rom.wram:
-            for lo, hi, title in ((0x7E0000, 0x7E0010, "WRAM interrupt stubs"),
-                                  (0x7E2000, 0x7E3700, "WRAM-resident engine code (decompressed from ROM at boot)")):
-                f.write("\n\n; ===== %s =====\n" % title)
+            # WRAM code regions = clusters of decoded WRAM instructions (gap < 0x40), rounded to 16 bytes.
+            # TG1 had a 5 KB engine at 7E2000; TG2 only has JML/JSL stubs in the first bytes of WRAM.
+            wa = sorted(a for a in code if (a >> 16) in (0x7E, 0x7F))
+            cl = []
+            for a in wa:
+                end = a + code[a].len
+                if cl and a - cl[-1][1] <= 0x40:
+                    cl[-1][1] = max(cl[-1][1], end)
+                else:
+                    cl.append([a, end])
+            for lo, hi in cl:
+                lo &= ~0xF; hi = (hi + 0xF) & ~0xF
+                f.write("\n\n; ===== WRAM code %06X-%06X (stubs / code copied to WRAM at run time) =====\n" % (lo, hi))
                 emit_range(f, lo, hi, "wram")
         if jts:
             f.write("\n; unresolved indirect jumps (jump tables):\n")

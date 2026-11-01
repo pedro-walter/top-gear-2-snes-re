@@ -9,8 +9,10 @@ randomizer/assembler workflow). Phases: **1 environment (done)**, 2 understand t
 | USA | Top Gear 2 (USA).sfc | usa | 01 | 1CD4 |
 | Europe | Top Gear 2 (Europe).sfc | eur | 02 | 15E7 |
 | Japan | Top Racer 2 (Japan).sfc | jpn | 00 | see romcmp |
-Native NMI/IRQ vectors are `$0000/$0004` = WRAM stubs again (same trick as TG1); code is decompressed to WRAM at boot, so
-disassembly needs a runtime trace + WRAM image (the Makefile does it).
+Native NMI/IRQ/COP vectors are `$0000/$0004/$0008` = WRAM stubs (`JML $81xxxx`, same trick as TG1); WRAM `$0010/$0015` hold `JSL $81xxxx; RTS` thunks.
+Unlike TG1 there is **no decompressed engine code in WRAM**: all code runs from ROM through the FastROM mirror (`$80-$FF`; the disassembler folds
+them onto `$00-$7F`). The trace + WRAM image are still needed for the stubs and to reach code only the game reaches at run time.
+The stub targets differ per version (USA NMI `01:E2F2`, EUR/JPN `01:E325`).
 
 ## Headless emulator (no window, no X server)
 Mesen2 `--testRunner` + Lua, binary in `tools/mesen/` (copied from snes-rea; gitignored), isolated HOME in `tools/mesen-home/`.
