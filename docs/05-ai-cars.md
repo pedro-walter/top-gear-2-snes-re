@@ -36,3 +36,16 @@ Loop over 20 grid slots (X = 0x26 down to 0, step 2; slot order from the permuta
 * `+0x30 = rand&FF + table 80:D6D4[slot]`, `+0x32 = table 80:D6FC[slot]` (ramps 5529..32512 and 8601..15963; per-car aggression/lane-change timers?, unverified).
 * Car-record writes seen at runtime: `+0x58/0x5A` (lap position, E680/E689), `+0x6C..6F` (copy by D857/D85D), nothing writes +0x24 after setup, so
   cars hold a fixed target speed; the earlier slowdown in my samples is the speed (`+0x1F`) tracking curve/slope limits in the handlers (not yet traced).
+
+## Handler table `00:E417` (byte index = value at `+0x1C`, verified from the table bytes `23E4 41E5 C4E6 DEE6 24E4 54E7`)
+| `+0x1C` | routine | role |
+|---|---|---|
+| 0 | `E423` | RTS - inactive slot |
+| 2 | `E541` | full update (near-player window, lateral motion, speed, lap distance) |
+| 4 | `E6C4` | **attached to player 1**: `+0x18/1A += $0212/$0214` (player's distance step), lateral `+0x14 = $0205` (car just follows the player) |
+| 6 | `E6DE` | same for player 2 (`$024E/$0250`, `$0241`) |
+| 8 | `E424` | **normal racing AI** (the value the setup `D1D4` stores): the 0x60-line window test, then falls into the `E541` motion code |
+| 0x0A | `E754` | **post-finish coasting**: speed only (accel `80:F093`, decel `80:F193` indexed by the target-speed error high byte), no lateral motion |
+Finish handling (`00:DE9B..`): `+0x22` is the car's lap counter; when it reaches `$019E` (total laps) the car's flag `+0x2B` bit1 is set and, if it is the player's car (`+0x10 == 0`), `sub_E6F8` / `E726` (P2) switch it to handler 0x0A with target speed `$4000` (`$3800` for P2),
+bump the finished counter `$06F0`, set `$0634 bit15`, and store the rank (`$06EE`) for the results screen. The 12-word shift at `DE50..DE98` maintains the car order list `$C3E8..$C400` (race positions).
+The AI speed approach: error = `+0x24 - +0x1F`; if positive speed += `F093[err>>8] * $F8 * 2` (clamped to the target), if negative the same with `F193` (so braking is stronger than accelerating).
