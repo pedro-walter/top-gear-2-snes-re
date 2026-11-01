@@ -70,3 +70,7 @@ Next: decode the bank-09 tables (curve/slope profiles) and the record bitfields.
 Check: summing the curve-profile sums over a lap's records gives about +/-35000..60000 for most tracks (same magnitude = one full
 loop of heading), with all indices <= 33 across all 64 tracks. So the track is: N records x 64 lines, curvature/hill integrated per line.
 Not yet: how the stream loop at `08:80C4` places objects and sets segment length ($3A/$3C counters).
+
+`tools/trackmap.py ROM K REPS` integrates the curve profiles (REPS=4 chunks of 16 lines per record). With K~3000 per-lap heading
+comes out at 0.7-1.3 turns for most tracks (e.g. 0.78, 1.01, 0.89), i.e. one loop, but endpoint closure is only rough (0.03-0.4 of length):
+the real game curvature->heading mapping is not linear (and the hill/stream parts are ignored), so treat the maps as approximate.
