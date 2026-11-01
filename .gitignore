@@ -1,0 +1,10 @@
+# copyrighted game data and anything derived from it
+*.sfc
+*.smc
+roms/
+out/
+disasm/tg2_*.asm
+# third-party emulator and its settings/caches
+tools/mesen/
+tools/mesen-home/
+__pycache__/
