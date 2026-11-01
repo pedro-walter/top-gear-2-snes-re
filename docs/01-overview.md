@@ -63,3 +63,4 @@ Double buffering: the sign of `$0124` selects the table buffer (`7E:AD7E`-ish vs
 `10-game-flow.md` championship / results / prize money.
 `11-assets.md` run-time decompression calls (all asset streams, by caller).
 `12-race-session.md` race start/frame loop/pause/finish/exit.
+`13-mod-index.md` where to change what (prices, prizes, curves, tables).
