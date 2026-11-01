@@ -41,3 +41,6 @@ The CPU writes a **16-bit word** to `$05A1` (low byte = SFX id, high byte `$FF` 
 | `00:D76F`, `D7CB` | `$FF1A`, `$FF19` | 1 | in the car-list walker `00:D726` (other-car effects: passing / engine of an AI car near the player) |
 | `00:A29B`, `00:BAFD` | register value | `$3F` | one-shot with the id taken from a register/table (`$3F` = max-volume param) |
 Engine pitch/volume goes through `$0598/$059D` (`00:8B79`, `00:9B0D`), not through the effect slots. Names of the ids are still unknown (the driver does not name them either; they index the song set's table at SPC `$0400+id*4`).
+
+## Reading SPC RAM from Mesen
+`emu.read(addr, emu.memType.spcRam)` (64 KB) and `emu.memType.spcDspRegisters` work in the headless runner (`scripts/spcdump.lua`, env `TG_SPC=frames`, writes `out/<tag>_<f>.spcram/.dsp`); `spcMemory` and `spcDebug` also exist. With it: the SFX table of the race song set is at SPC `$0400+id*4` and `$0500+id*4`; it has **34 real entries (ids 0..33 = `$21`)**, the rest repeat a filler (`14 30 cf 1f / 06 06 07 00`), which agrees with the highest id the CPU sends (`$21`, `00:A636`). Example entries (4 + 4 bytes): id 1 `14 01 bf ba / 80 c6 07 24`, id 19 `ff e2 ff e1 / 80 0d 12 ff` (field meaning not decoded: probably sample number, ADSR, pitch and priority).
