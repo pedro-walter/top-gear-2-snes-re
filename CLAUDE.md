@@ -36,6 +36,7 @@ adapting to TG2's differences (1 MB, different data layout).
 `make smoke | race VER=eur | trace VER=jpn | merge VER=usa | disasm VER=usa`
 Coverage workflow: `make trace` (base race trace + WRAM image) -> `tools/fuzz.sh VER menu|race SEEDS` (extra traces `out/f_<ver>_*`) -> `make merge` -> `make disasm`.
 Profiling: `--lua scripts/pchist.lua` (env TG_PF_FROM/TG_PF_TO) then `tools/prof.py out/<tag>_pchist.txt disasm/tg2_usa.asm`; `scripts/bankprof.lua` for per-bank usage.
+Decompressors are ported (`tools/tg2decomp.py`, `tools/gfxdump.py`, notes in `docs/02-compression.md`).
 Watch addresses use the **FastROM mirror** the CPU executes (e.g. `81839A:x`, not `01839A`); WRAM is `7E....` or `0000..1FFF`. `--load` of a savestate in a fresh run looked like it restarted the game (menu code ran) - unverified, re-run the preset instead.
 
 ## Conventions
