@@ -20,3 +20,15 @@ Player names are 12-char strings at `$7EFE1C` / `$7EFE45` copied to `$01E4` / `$
 Open: connect `$067A..$0686` (car constants) and `$068C` to the physics routine `00:8A41` (`docs/03-physics.md` mentions `$D4/$D5/$88`); decode what `$0690..$06C4` mean.
 
 **Verified** (`scripts/upg.lua`, poking the P1 words in the shop and sampling at frame 3300): level 0 -> 3 changes `$068C` 0->3, `$0698` 40->52, `$06C0` 5->7 (gears), `$068E` 236->248 (k5), `$06C4` 4096->0 (k4 nitro), `$0697` 24->8 (k6 armor). The mapping above holds.
+
+## Where the variables are consumed (physics runs with **DP = `$0600`**, so `$8C` means `$068C`; found by grepping DP operands in `00:8A41..9FFF`)
+| var | users | what the code does there |
+|---|---|---|
+| `$8C` engine level | `00:8F51` | `X = $8C*2` indexes the acceleration curve tables right after the "accelerating" flag (`$34` bit0) is set |
+| `$8A` gearbox level | `00:8CAE, 8D04, 8D3C, 8D95, 99CD, 9B69, D5BC` | `X = $8A*2`, `ADC 80:BDF3,X` + `$30` (gear) -> index into `80:BDFB` = **gear ratio table** (multiplied by speed `$1D/$1E` through the PPU multiplier) |
+| `$94` tyre grip | `00:9375, 9402` | multiplies the cornering/skid quantity (`MPYM` * 8 * `$94`) |
+| `$8E` (k5, 236..248) | `00:98D9` | multiplies the speed `$1D` (hardware multiplier) - a speed/drag scale, so k5 is **not** a cosmetic item; its name ("Gas Tank"?) is unverified |
+| `$7A,7C,7E,80,82,84,86` car constants | `8CD7, 8CEF, 8BCB, 8C19, 931E, 93A9, 8E09` (+ second uses) | per-car handling constants |
+| `$0698` | `00:8B6B` | engine **sound** volume: `(31-lap_pos...) * $0698` -> `$059D` (sound mailbox), not engine power |
+| `$0695/96/97` armor | `00:E9AA, EEF9, EFF9, F016` | damage/collision scaling in the AI/collision code |
+| `$C4` (`$06C4`, nitro) | `00:8E36, 8E7A` | nitro quantity/duration |
