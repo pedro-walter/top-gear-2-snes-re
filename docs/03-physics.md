@@ -34,3 +34,9 @@ After a gear change the game loads `X = 80:BDF3[$8A*2] + $30` (gearbox level, cu
 | 2 | E0 40 4D 5B 68 76 | 127 112 48 24 18 15 |
 | 3 | E0 40 4D 59 66 72 7F | 127 112 52 28 22 16 14 |
 So a better gearbox adds gears and slightly raises the top-gear multipliers. `$94` (tyre grip) scales the cornering term; the "per-car constants" `$7A..$86` are **button masks** (see `09-car-setup.md`).
+
+### Steering (`00:92A0..93E0`, read, not verified in the emulator)
+`$D0/$D2` = a signed quantity derived from speed and the road curve (product of `$2135` MPYM, shifted right twice). `$38/$39` is the steering/lateral state (24-bit signed) of the car:
+* with no button pressed it is pulled towards 0 by `|$D0|/4 * $0D` (centering; `0092CA..931A`, sign of `$39` picks add/subtract);
+* **LEFT** (`BIT $0028` against mask `$82`, `00:9320`): `$38/$39 -= |$D0|/4 * $1A` (twice the centering rate), clamped at `$FF82` (-126); **RIGHT** (mask `$84`, `00:93AB`) does the mirror image (+, clamp +126);
+* while steering on a road line whose attribute `7E:9010,X` is non-negative, a skid term `MPYM*8 * $94` (tyre grip) is added to `$48` (clamp `$7000`) and `$4C` (clamp `$0300`): `$48/$4C` look like the slip/drift accumulators (lower `$94` = better grip = less slip).
