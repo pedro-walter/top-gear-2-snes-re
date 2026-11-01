@@ -16,7 +16,7 @@ Each player has a 0x29-byte struct in WRAM: **P1 at `$1CFF`, P2 at `$1D28`** (`$
 | off | P1 addr | meaning | password digit radix |
 |---|---|---|---|
 | +00 | 1CFF | toggle set by left/right in the shop (Auto/Manual, guess) | 2 |
-| +02 | 1D01 | selected car 0..4, bit15 = confirmed (`1F:8F11`) | 10 (d>=5 -> (d-5)\|8000) |
+| +02 | 1D01 | **control type** 0..4 (CONTROL menu; was mislabelled "car"), bit15 = flag (`1F:8F11`) | 10 (d>=5 -> (d-5)\|8000) |
 | +04..+14 | 1D03,05,...,13 | one word per shop category, 0 = not bought, `$8000\|level` = bought. Order: **Engine, Wet Tires, Dry Tires, Gearbox, Nitro**, then three more (Side/Rear/Front Armor; Paint) | 4,4,4,4,4,4,5,5,5 (k0..k8) |
 | +16 | 1D15 | unknown (radix 8, maybe paint colour; only the password code touches it) | 8 |
 | +18 | 1D17 | copy of k1 (a quirk of the password code) | (shares digit with k1) |

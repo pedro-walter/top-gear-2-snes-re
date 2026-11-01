@@ -7,10 +7,10 @@ ALPHA = "BCDFGHJLMNPQRTVWY#?()<>12345 6789".replace(' ', '')  # screen order; RO
 ROMALPHA = bytes.fromhex('42 43 44 46 47 48 4a 4c 4d 4e 50 51 52 54 56 57 59 31 32 33 34 35 36 37 38 39 23 3f 28 29 3c 3e'.replace(' ', '')).decode('latin1')
 KEY = bytes.fromhex('0d051a141a0e1707160d0c1606130d1b1d1b1d1f1200')
 # (radix, name) in decode order; name -> destination word
-FIELDS = [(0x6D, 'checksum'), (2, 'f17D1_music'), (0x41, 'country4'), (3, 'difficulty'), (0x500, 'p2_money'), (10, 'p2_car'),
+FIELDS = [(0x6D, 'checksum'), (2, 'f17D1_music'), (0x41, 'country4'), (3, 'difficulty'), (0x500, 'p2_money'), (10, 'p2_control'),
           (2, 'p2_manual'), (8, 'p2_paint'), (5, 'p2_armor3'), (5, 'p2_armor2'), (5, 'p2_armor1'), (4, 'p2_gas'), (4, 'p2_nitro'), (4, 'p2_gearbox'),
           (4, 'p2_dry'), (4, 'p2_wet'), (4, 'p2_engine'),
-          (0x500, 'p1_money'), (10, 'p1_car'), (2, 'p1_manual'), (8, 'p1_paint'), (5, 'p1_armor3'), (5, 'p1_armor2'), (5, 'p1_armor1'),
+          (0x500, 'p1_money'), (10, 'p1_control'), (2, 'p1_manual'), (8, 'p1_paint'), (5, 'p1_armor3'), (5, 'p1_armor2'), (5, 'p1_armor1'),
           (4, 'p1_gas'), (4, 'p1_nitro'), (4, 'p1_gearbox'), (4, 'p1_dry'), (4, 'p1_wet'), (4, 'p1_engine')]
 def stored(name, v):   # value as stored in the word table that the checksum sums
     if name == 'country4': return v >> 2
@@ -39,4 +39,4 @@ if __name__ == '__main__':
     if sys.argv[1] == 'decode':
         o, ok, rest = decode(sys.argv[2]); print('valid' if ok else 'BAD checksum', 'leftover', rest); [print(' ', *x) for x in o]
     else:
-        kv = {k: int(v) for k, v in (a.split('=') for a in sys.argv[2:])}; pw = encode(kv); print(pw); print(decode(pw)[1])
+        kv = {k.replace('_car', '_control'): int(v) for k, v in (a.split('=') for a in sys.argv[2:])}; pw = encode(kv); print(pw); print(decode(pw)[1])
