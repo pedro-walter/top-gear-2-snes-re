@@ -74,3 +74,9 @@ Not yet: how the stream loop at `08:80C4` places objects and sets segment length
 `tools/trackmap.py ROM K REPS` integrates the curve profiles (REPS=4 chunks of 16 lines per record). With K~3000 per-lap heading
 comes out at 0.7-1.3 turns for most tracks (e.g. 0.78, 1.01, 0.89), i.e. one loop, but endpoint closure is only rough (0.03-0.4 of length):
 the real game curvature->heading mapping is not linear (and the hill/stream parts are ignored), so treat the maps as approximate.
+
+## `$0120` = difficulty (verified)
+`$0120` is loaded from `7E:FE06` by `00:CD09` (a game-setup copy: `FE04`->`$0102` mode, `FE3E`/`FE67`->`$0104/$0106` chosen cars, `FE0A*4+FE0E` -> `$0108`).
+Poking `7EFE06` = 2 vs 0 before the race raises the AI cars' speed field (0x2FE6 -> 0x3435 for car 1) - same as the D67E table in `docs/05-ai-cars.md`.
+So the road builder's 3 views of the `09:xxxx` word stream (10-bit fields at bits 0-9 / 2-11 / 4-13) are **per-difficulty** versions of the same object/traffic stream.
+`7EFF1A` != 0 selects special modes (override of `$0102`, `$0108` from `80:F2D7/F2DD`, difficulty forced 0) - probably championship/challenge races.
