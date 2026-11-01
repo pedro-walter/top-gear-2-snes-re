@@ -18,3 +18,5 @@ k0 Engine, k1 Wet Tires, k2 Dry Tires, k3 Gearbox, k4 Nitro, k5 Gas Tank (4-valu
 
 Player names are 12-char strings at `$7EFE1C` / `$7EFE45` copied to `$01E4` / `$01F0`. `$06EE/$06F0` (rank, finished count) are cleared here.
 Open: connect `$067A..$0686` (car constants) and `$068C` to the physics routine `00:8A41` (`docs/03-physics.md` mentions `$D4/$D5/$88`); decode what `$0690..$06C4` mean.
+
+**Verified** (`scripts/upg.lua`, poking the P1 words in the shop and sampling at frame 3300): level 0 -> 3 changes `$068C` 0->3, `$0698` 40->52, `$06C0` 5->7 (gears), `$068E` 236->248 (k5), `$06C4` 4096->0 (k4 nitro), `$0697` 24->8 (k6 armor). The mapping above holds.
