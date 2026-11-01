@@ -32,3 +32,5 @@ Open: connect `$067A..$0686` (car constants) and `$068C` to the physics routine 
 | `$0698` | `00:8B6B` | engine **sound** volume: `(31-lap_pos...) * $0698` -> `$059D` (sound mailbox), not engine power |
 | `$0695/96/97` armor | `00:E9AA, EEF9, EFF9, F016` | damage/collision scaling in the AI/collision code |
 | `$C4` (`$06C4`, nitro) | `00:8E36, 8E7A` | nitro quantity/duration |
+
+Effect check (`scripts/upg2.lua`, hold X from the green flag, `$0610` speed_fine at frame 3400, i.e. ~400 frames after the start): engine level 0 -> 3 = 1174 -> **1666 (+42%)**; gearbox 0 -> 3 and k5 0 -> 3 show no difference in that window (they matter at higher speed / gear changes). Later samples are noisy (the car is not steered and hits walls).
