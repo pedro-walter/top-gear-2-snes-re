@@ -44,7 +44,7 @@ Loop over 20 grid slots (X = 0x26 down to 0, step 2; slot order from the permuta
 | 2 | `E541` | full update (near-player window, lateral motion, speed, lap distance) |
 | 4 | `E6C4` | **attached to player 1**: `+0x18/1A += $0212/$0214` (player's distance step), lateral `+0x14 = $0205` (car just follows the player) |
 | 6 | `E6DE` | same for player 2 (`$024E/$0250`, `$0241`) |
-| 8 | `E424` | **normal racing AI** (the value the setup `D1D4` stores): the 0x60-line window test, then falls into the `E541` motion code |
+| 8 | `E424` | **start / launch phase** (value stored by the setup `D1D4`): same window test as `E541`, then (`E4D9`) speed `+0x1F += +0x30 * $F8` (**+0x30 = launch acceleration**, `rand&FF + 80:D6D4[slot]`) until it reaches **+0x32** (`80:D6FC[slot]`), then `+0x1C` is set to 2 and the car runs `E541` for the rest of the race. Lap distance advances as in `E541` |
 | 0x0A | `E754` | **post-finish coasting**: speed only (accel `80:F093`, decel `80:F193` indexed by the target-speed error high byte), no lateral motion |
 Finish handling (`00:DE9B..`): `+0x22` is the car's lap counter; when it reaches `$019E` (total laps) the car's flag `+0x2B` bit1 is set and, if it is the player's car (`+0x10 == 0`), `sub_E6F8` / `E726` (P2) switch it to handler 0x0A with target speed `$4000` (`$3800` for P2),
 bump the finished counter `$06F0`, set `$0634 bit15`, and store the rank (`$06EE`) for the results screen. The 12-word shift at `DE50..DE98` maintains the car order list `$C3E8..$C400` (race positions).
