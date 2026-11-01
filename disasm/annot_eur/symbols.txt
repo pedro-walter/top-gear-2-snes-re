@@ -1,0 +1,44 @@
+# Routine names and documentation (USA). "@BBAAAA name" then ";; text" lines (first line = one-line summary).
+# Confidence: no mark = verified (code read and/or emulator), (?) = inferred.  Addresses are LoROM bank:offset (banks 00..1F).
+
+# ---------------------------------------------------------------- boot
+@008A39 reset_vec
+;; RESET vector: CLC; XCE; JML 01:8003 (native mode, then the 01:8008 init sequence).
+# UNMATCHED 018008 boot_init (ambiguous)
+;; Forced blank, wait two vblanks, DP=0, S=$07FF, JSR 01F7FD (title/menu data setup) then JML 1F:8000 (front-end).
+@1F8000 frontend_entry
+;; Front-end (title / menus / car shop) entry: DBR=$9F, S=$1FFF, DP=$0100.  All menu code lives in bank 1F; it busy-waits on $4211/$4212.
+
+# ---------------------------------------------------------------- interrupts
+@01E325 nmi_handler
+;; NMI body the WRAM stub (7E0000: JML $81E2F2) jumps to.  Saves regs, DP=0, DBR=$82, copies $0122->$22, fades the screen
+;; brightness in $58/$5D (fixed-point 8.4 steps, limit $0F00) and bumps frame counters $1A/$1C.
+# ---------------------------------------------------------------- decompression
+# UNMATCHED 01DC53 decomp_to_wram (no match)
+;; LZ/RLE decompressor to WRAM.  A=src bank (low byte) | dest-bank bit in A.high bit0 (=> 7E/7F), X=src offset, Y=dest offset.
+;; Writes through WMDATA ($2180).  Command byte: top 3 bits select one of 7 handlers via the jump table at 01:DC91
+;; (literal run / long literal / RLE / long RLE / back-reference variants); cmd $00 ends the stream.  Returns A = bytes written.
+# UNMATCHED 01DE85 decomp_to_wram_b (no match)
+;; Second decompressor variant (17 callers), same register convention, its own handler table at 01:DEC2.
+
+# ---------------------------------------------------------------- race frame
+@008A42 road_scroll_calc
+;; Per-frame road geometry (DP=$0600): scroll/perspective maths using the PPU multiplier ($211B/$211C -> $2134-36).
+@00D7C6 car_list_update
+;; Updates the car/object records (see ram.txt: 0x40-byte records at 7E:C400...).
+@00D8EB car_dispatch_0
+;; Start of a run of 20 unrolled blocks that copy record fields and call the per-record handler `JSR ($E417,X)`.
+# UNMATCHED 00F042 mul_16x8 (ambiguous)
+;; Small signed multiply helper (A * byte -> $01CC/$01CE/$01D0 accumulators via the PPU multiplier).  ~10% of race CPU time.
+@08CB74 road_render
+;; Biggest per-frame routine (~36% of race CPU time): builds the road scanline tables; uses PPU multiplier and the hardware divider ($4204-$4214).
+# UNMATCHED 0B8000 hdma_build (ambiguous)
+;; Builds the per-scanline HDMA tables in WRAM (double buffered, selected by sign of $0124: buffers around $AD7E / $AE7E).
+@0B8589 road_lines
+;; Large per-scanline loop (14% of race CPU time), calls 0BA49B/0BA6EA/0BD7E7.
+@0BA6FB road_lines_inner
+;; ~11% of race CPU time; heavy use of the PPU multiplier.
+# UNMATCHED 088BCA race_frame_b (ambiguous)
+;; Called each race frame together with 008A41/00D726/08CB74/0B8000 (frame pipeline at 01:828B).
+;; 00:8A41 is really the PLAYER CAR UPDATE (physics + movement), not just road scroll: DP=$0600; speed 24-bit at $061C-$061E,
+;; accel from gear tables (80:BE33, 80:C633, 80:CA33), drag from 80:C833 indexed by speed, all via the $211B/$211C multiplier ($2134-36).

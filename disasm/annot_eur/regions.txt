@@ -1,0 +1,34 @@
+# Data regions: "BBAAAA-BBAAAA kind text"  (kind: db, dw, ptr)  and "bank NN text"
+bank 00 engine + tables: code from 8A38; 8000-8A37 is a 32x32-entry table (multiplication / scaling lookup)
+bank 01 engine: boot (8003), main frame sequence (8145..), decompressors (DC53/DE85), NMI (E2F2), sprite/OAM code
+bank 02 pointer tables / data (starts with a word table)
+bank 03 compressed graphics (entropy ~0.9) (?)
+bank 04 compressed graphics (entropy ~0.9) (?)
+bank 05 compressed graphics (entropy ~0.9) (?)
+bank 06 compressed graphics (entropy ~0.9) (?)
+bank 07 sound: SPC700 program/music data (?)
+bank 08 race code: road render (8CB74), car code (88BCA)
+bank 09 data tables (0A starts with pointer records)
+bank 0A data tables (0A starts with pointer records)
+bank 0B race code: HDMA/road line builders (8000, 8578, A49B, A6EA, D7E7)
+bank 0C 15-bit palettes / colour tables (BGR words); 0E also holds ~1.2 KB of code
+bank 0D 15-bit palettes / colour tables (BGR words); 0E also holds ~1.2 KB of code
+bank 0E 15-bit palettes / colour tables (BGR words); 0E also holds ~1.2 KB of code
+bank 0F 15-bit palettes / colour tables (BGR words); 0E also holds ~1.2 KB of code
+bank 10 mostly zeros: tilemap / track data (?)
+bank 11 mostly zeros: tilemap / track data (?)
+bank 12 mixed data (?)
+bank 13 mixed data (?)
+bank 14 mixed data (?)
+bank 15 mixed data (?)
+bank 16 compressible data (tilemaps?) (?)
+bank 17 compressible data (tilemaps?) (?)
+bank 18 compressed graphics (entropy ~0.87) (?)
+bank 19 compressed graphics (entropy ~0.87) (?)
+bank 1A compressed graphics (entropy ~0.87) (?)
+bank 1B compressed graphics (entropy ~0.87) (?)
+bank 1C compressed graphics (entropy ~0.87) (?)
+bank 1D compressed graphics (entropy ~0.87) (?)
+bank 1E compressed graphics (entropy ~0.87) (?)
+bank 1F front-end: title, menus, car shop, options (code 8000-FFFF, DP=$0100, DBR=$9F)
+00D84B-00D9DA code 20 unrolled blocks (21 bytes each) calling JSR ($E417,X) per car record

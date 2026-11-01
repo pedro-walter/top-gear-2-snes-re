@@ -57,3 +57,4 @@ Double buffering: the sign of `$0124` selects the table buffer (`7E:AD7E`-ish vs
 ## Doc index (phase 2)
 `02-compression.md` decompressors - `03-physics.md` player physics - `04-tracks.md` unlock poke, track table, road builder, segment records, difficulty `$0120` -
 `05-ai-cars.md` AI car records/update/setup - `06-password.md` password codec (`tools/password.py`).
+* `docs/07-versions.md` - USA/EUR/JPN address map and password compatibility
