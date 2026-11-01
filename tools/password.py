@@ -1,0 +1,42 @@
+#!/usr/bin/env python3 -I
+"""password.py decode PASSWORD | encode country=N ...   Top Gear 2 (USA) password codec (validator 1F:D4B3).
+22 chars from a 32-char alphabet -> 5-bit v_i = ((idx_i - idx_{i-1}) ^ KEY[i]) & 31 -> N = sum v_i*32^i
+-> mixed-radix digits (RADIX order below, via 1F:D887, least significant first). First digit = checksum = (sum of 30 stored words) mod 109."""
+import sys
+ALPHA = "BCDFGHJLMNPQRTVWY#?()<>12345 6789".replace(' ', '')  # screen order; ROM order (below) is what counts
+ROMALPHA = bytes.fromhex('42 43 44 46 47 48 4a 4c 4d 4e 50 51 52 54 56 57 59 31 32 33 34 35 36 37 38 39 23 3f 28 29 3c 3e'.replace(' ', '')).decode('latin1')
+KEY = bytes.fromhex('0d051a141a0e1707160d0c1606130d1b1d1b1d1f1200')
+# (radix, name) in decode order; name -> destination word
+FIELDS = [(0x6D, 'checksum'), (2, 'f17D1_music'), (0x41, 'country4'), (3, 'difficulty'), (0x500, 'a_money?'), (10, 'a_car?'),
+          (2, 'a_17A3'), (8, 'a_17A5'), (5, 'a_17A7'), (5, 'a_17A9'), (5, 'a_17AB'), (4, 'a_17AD'), (4, 'a_17AF'), (4, 'a_17B1'),
+          (4, 'a_17CD'), (4, 'a_179F'), (4, 'a_17B3'),
+          (0x500, 'b_money?'), (10, 'b_car?'), (2, 'b_17BB'), (8, 'b_17BD'), (5, 'b_17BF'), (5, 'b_17C1'), (5, 'b_17C3'),
+          (4, 'b_17C5'), (4, 'b_17C7'), (4, 'b_17C9'), (4, 'b_17CF'), (4, 'b_17B7'), (4, 'b_17CB')]
+def stored(name, v):   # value as stored in the word table that the checksum sums
+    if name == 'country4': return v >> 2
+    if name.endswith('car?') : return ((v - 5) | 0x8000) if v >= 5 else v
+    return v
+def decode(pw):
+    assert len(pw) == 22
+    prev = 0; n = 0
+    for i, ch in enumerate(pw):
+        idx = ROMALPHA.index(ch); v = ((idx - prev) ^ KEY[i]) & 31; prev = idx; n |= v << (5 * i)
+    out = []
+    for r, nm in FIELDS: out.append((nm, n % r)); n //= r
+    chk = (sum(stored(nm, v) for nm, v in out[1:]) & 0xFFFF) % 109
+    return out, chk == out[0][1], n
+def encode(vals):
+    """vals: dict name->raw digit (default 0). Returns the password."""
+    d = [vals.get(nm, 0) for r, nm in FIELDS[1:]]
+    chk = (sum(stored(nm, v) for (r, nm), v in zip(FIELDS[1:], d)) & 0xFFFF) % 109
+    ds = [chk] + d; n = 0
+    for (r, nm), v in reversed(list(zip(FIELDS, ds))): n = n * r + v
+    pw = ''; prev = 0
+    for i in range(22):
+        v = (n >> (5 * i)) & 31; idx = ((v ^ KEY[i]) + prev) & 31; pw += ROMALPHA[idx]; prev = idx
+    return pw
+if __name__ == '__main__':
+    if sys.argv[1] == 'decode':
+        o, ok, rest = decode(sys.argv[2]); print('valid' if ok else 'BAD checksum', 'leftover', rest); [print(' ', *x) for x in o]
+    else:
+        kv = {k: int(v) for k, v in (a.split('=') for a in sys.argv[2:])}; pw = encode(kv); print(pw); print(decode(pw)[1])
