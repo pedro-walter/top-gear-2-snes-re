@@ -80,3 +80,15 @@ the real game curvature->heading mapping is not linear (and the hill/stream part
 Poking `7EFE06` = 2 vs 0 before the race raises the AI cars' speed field (0x2FE6 -> 0x3435 for car 1) - same as the D67E table in `docs/05-ai-cars.md`.
 So the road builder's 3 views of the `09:xxxx` word stream (10-bit fields at bits 0-9 / 2-11 / 4-13) are **per-difficulty** versions of the same object/traffic stream.
 `7EFF1A` != 0 selects special modes (override of `$0102`, `$0108` from `80:F2D7/F2DD`, difficulty forced 0) - probably championship/challenge races.
+
+## Roadside object stream (`08:80C4..`, partly verified by decoding the data)
+* Source: `09:0000 + X`, X = `$44` starting at `09:90C0[(rec0>>6)&3F] + 3`, advancing **4 bytes per entry**. Each 32-bit entry packs **three 10-bit codes, one per difficulty** (bits 0-9 / 10-19 / 20-29, read as unaligned words at X, X+1, X+2 and masked; `$0120` picks which).
+* Code `v` (10 bits): `v>>7 & 7` = category, low 7 bits = parameter.
+  * category 0: **gap**: `$48 = v`, i.e. skip that many road lines (output 0) - `0:4` = four empty lines.
+  * category 1..7: an object on this line. `$4A = v`; the category (x2) indexes `88:EABB` (1,2,4,...,128 bit mask) which is ANDed with `$22` (a per-line byte from `$6200`, derived from `$3E-$24`): if the bit is set the object is suppressed (a distance/LOD or visibility mask).
+    Otherwise the descriptor = `09:B1EB[(rec0&3F)*16 + category*2]` (one 8-word row per "scenery set" = `rec[0]&3F`).
+    * positive descriptor: low 8 bits = object/tile id, upper bits from `$49`; stored in the line word at `$9006,Y` / `$9206,Y`.
+    * negative descriptor: bit14 set -> no object; else a **multi-line object**: the line index `$30` is pushed on a ring buffer at `$9800` (`$2E`, wraps at 0x200), `$6400+$30 |= 0x40`, and `$30` advances by `desc & 0x3FFF` (resets to 0 when equal to `$00`).
+* Typical Auckland data: segment 1 = `0:4, 2:88` repeating (a category-2 object every 5 lines, e.g. roadside posts), segment 2 = `1:40, 0:4` repeating. Difficulty views were identical in these samples, they differ on other tracks.
+* Descriptor rows (`09:B1EB`): row 0 = `0000 002C 0030 0008 004E 004F 8002 0049`, row 4 = `0000 004B x6 0000` (all-same fence/wall object).
+* Still open: the meaning of the 3rd-field table `09:8C40` and what `$3A/$3C` (line within segment / segment length) do exactly; what id values 0x2C, 0x4B... draw (sprite or BG tile).
