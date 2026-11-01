@@ -23,3 +23,9 @@ FE08 b boot_flag     7E:FE08 tested during boot (selects $99 = $FF/$00)
 0108 track_no - track number = 4*country+sub (00:CD38), index of the 8-byte track table at 0A:8000
 01A5 country_cursor - country selected on the country select screen (menu use of the $01A4 word)
 1CE3 max_country_unlocked - 1F:C9CD compares the cursor to it; larger -> password screen
+1CFF p1_shop_toggle - player 1 struct base (0x29 bytes; P2 at 1D28), see docs/06-password.md
+1D01 p1_car - selected car 0..4, bit15 = confirmed
+1D03 p1_upgrades - 9 words: Engine, Wet, Dry, Gearbox, Nitro, ... (bit15 | level)
+1D19 p1_money - $1000 units
+1D42 p2_money - P2 struct +1A
+1CE1 country_money_base - start money = this*10 (units $1000) after password

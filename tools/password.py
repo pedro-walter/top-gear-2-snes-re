@@ -7,11 +7,11 @@ ALPHA = "BCDFGHJLMNPQRTVWY#?()<>12345 6789".replace(' ', '')  # screen order; RO
 ROMALPHA = bytes.fromhex('42 43 44 46 47 48 4a 4c 4d 4e 50 51 52 54 56 57 59 31 32 33 34 35 36 37 38 39 23 3f 28 29 3c 3e'.replace(' ', '')).decode('latin1')
 KEY = bytes.fromhex('0d051a141a0e1707160d0c1606130d1b1d1b1d1f1200')
 # (radix, name) in decode order; name -> destination word
-FIELDS = [(0x6D, 'checksum'), (2, 'f17D1_music'), (0x41, 'country4'), (3, 'difficulty'), (0x500, 'a_money?'), (10, 'a_car?'),
-          (2, 'a_17A3'), (8, 'a_17A5'), (5, 'a_17A7'), (5, 'a_17A9'), (5, 'a_17AB'), (4, 'a_17AD'), (4, 'a_17AF'), (4, 'a_17B1'),
-          (4, 'a_17CD'), (4, 'a_179F'), (4, 'a_17B3'),
-          (0x500, 'b_money?'), (10, 'b_car?'), (2, 'b_17BB'), (8, 'b_17BD'), (5, 'b_17BF'), (5, 'b_17C1'), (5, 'b_17C3'),
-          (4, 'b_17C5'), (4, 'b_17C7'), (4, 'b_17C9'), (4, 'b_17CF'), (4, 'b_17B7'), (4, 'b_17CB')]
+FIELDS = [(0x6D, 'checksum'), (2, 'f17D1_music'), (0x41, 'country4'), (3, 'difficulty'), (0x500, 'p2_money'), (10, 'p2_car'),
+          (2, 'p2_manual'), (8, 'p2_x8'), (5, 'p2_up8'), (5, 'p2_up7'), (5, 'p2_up6'), (4, 'p2_up5'), (4, 'p2_nitro'), (4, 'p2_gearbox'),
+          (4, 'p2_dry'), (4, 'p2_wet'), (4, 'p2_engine'),
+          (0x500, 'p1_money'), (10, 'p1_car'), (2, 'p1_manual'), (8, 'p1_x8'), (5, 'p1_up8'), (5, 'p1_up7'), (5, 'p1_up6'),
+          (4, 'p1_up5'), (4, 'p1_nitro'), (4, 'p1_gearbox'), (4, 'p1_dry'), (4, 'p1_wet'), (4, 'p1_engine')]
 def stored(name, v):   # value as stored in the word table that the checksum sums
     if name == 'country4': return v >> 2
     if name.endswith('car?') : return ((v - 5) | 0x8000) if v >= 5 else v
