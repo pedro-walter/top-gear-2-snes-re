@@ -23,6 +23,7 @@ File offset = `bank*0x8000 + addr - 0x8000`. EUR/JPN differ by small shifts (`to
 | Number of gears per gearbox level: 5,6,6,7 | 00:D0D2 | 0x050D2 |  |
 | Track table, 8 bytes x 64 (seg ptr, seg count => laps = 64/count + 1, +6 weather/class) | 0A:8000 | 0x50000 | docs/04-tracks.md |
 | AI launch acceleration / launch-exit speed per grid slot | 00:D6D4 | 0x056D4 | D6FC for the exit speed (docs/05-ai-cars.md) |
+| AI target speed: per track (64 words) / per difficulty (0,768,1536) / per grid slot (20 words, 14336 - 230*slot) | 00:D5FE / D67E / D684 | 0x55FE / 0x567E / 0x5684 | docs/05-ai-cars.md |
 | AI speed-step acceleration table | 00:F093 | 0x07093 | docs/05-ai-cars.md |
 | Roadside descriptor rows (8 words x scenery set) | 09:B1EB | 0x4B1EB | docs/04-tracks.md |
 | SPC700 driver (compressed) | 1A:8000 | 0xD0000 | BF14 stream, 3244 bytes decompressed |

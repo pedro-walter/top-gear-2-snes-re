@@ -49,3 +49,11 @@ Loop over 20 grid slots (X = 0x26 down to 0, step 2; slot order from the permuta
 Finish handling (`00:DE9B..`): `+0x22` is the car's lap counter; when it reaches `$019E` (total laps) the car's flag `+0x2B` bit1 is set and, if it is the player's car (`+0x10 == 0`), `sub_E6F8` / `E726` (P2) switch it to handler 0x0A with target speed `$4000` (`$3800` for P2),
 bump the finished counter `$06F0`, set `$0634 bit15`, and store the rank (`$06EE`) for the results screen. The 12-word shift at `DE50..DE98` maintains the car order list `$C3E8..$C400` (race positions).
 The AI speed approach: error = `+0x24 - +0x1F`; if positive speed += `F093[err>>8] * $F8 * 2` (clamped to the target), if negative the same with `F193` (so braking is stronger than accelerating).
+
+## AI target speed formula (`00:D1BD..D293`, read; the speed target `+0x24` of each AI record)
+`+0x24 = 80:D5FE[track]  +  80:D67E[difficulty ($0120)]  +  80:D684[grid slot]  -  (rand & 0x3FF)`  (signed words, same units as the player's speed word `$061D`)
+* `80:D5FE` (64 signed words, one per track = `$0108`): -1280 -1184 -1104 -1024 | -576 -560 -416 -384 | 48 128 176 240 | 640 x4 | 1152 x4 | 1440 1472 1536 1568 | 1920 1968 2080 2176 | 2448 2464 2480 2496 | 2768 .. 2816 | 3104 .. 3152 | 3296 .. 3336 | 3472 .. 3496 | 3628 .. 3640 | 3772 .. 3784 | 3916 .. 3928 | 4060 .. 4072: **AI gets faster with every race of the championship** (country 0 slowest, last country +5350 above the first).
+* `80:D67E` = 0, 768, 1536 for difficulty 0/1/2 (the `$0120` value of the three levels).
+* `80:D684` (20 words, per grid slot): 14336 minus 230 per slot (slot 0 = fastest ... slot 19 = 9966): the starting grid is also the strength order.
+* The random part is drawn once per car at race start (`rng` at `01:E25B`), so every race the field is slightly different: up to 1023 slower.
+Together with the acceleration steps from `80:F093` and the launch fields (`+0x30/+0x32`), this is the whole AI strength model found so far; there is **no per-lap rubber banding in this setup code** (handler `E541` only moves the speed towards `+0x24`).
